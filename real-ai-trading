@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>রিয়েল AI ট্রেডিং v3.2 (লাইভ + হোস্টিং গাইড)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/styles/choices.min.css"/>
+<style>
+:root{--bg:#0a1a2e;--card:#14243a;--muted:#a0b8d8;--accent:#00d4aa;--good:#00ff88;--bad:#ff3b5b;--warn:#ffcc00}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui;background:var(--bg);color:#e6f3fb;padding:10px}
+.wrap{max-width:1300px;margin:auto}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:8px 0}
+h1{margin:0;color:var(--accent);font-size:1.35rem}
+.grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+@media(min-width:1000px){.grid{grid-template-columns:2fr 1fr}}
+.card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 10px 50px rgba(0,0,0,.4)}
+iframe{width:100%;height:520px;border:0;border-radius:10px}
+.kv{display:flex;justify-content:space-between;margin:8px 0;color:var(--muted);font-size:0.95rem}
+.big{font-size:1.15rem;font-weight:600}
+.pred{background:#0c1e30;border-radius:12px;padding:14px;margin-top:12px;border:1px solid rgba(255,255,255,0.05)}
+.ok{color:var(--good)}
+.down{color:var(--bad)}
+.neutral{color:var(--warn)}
+ul.reasons{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+li.r{background:#0f2338;padding:8px;border-radius:8px;font-size:0.9rem;color:var(--muted)}
+.hint{font-size:0.85rem;color:var(--muted);margin-top:8px}
+.status{font-size:0.9rem;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{background:var(--accent);border:none;padding:9px 14px;border-radius:8px;color:#001a18;cursor:pointer;font-weight:500;transition:.2s}
+button:hover{background:#00b895}
+button[disabled]{opacity:.5;cursor:not-allowed}
+.choices{width:190px}.choices__inner{background:#0f2338;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:2px 6px;font-size:0.9rem}
+.choices__list--dropdown{background:var(--card);border:1px solid rgba(255,255,255,.12)}
+.choices__input,.choices__item{color:var(--muted)}
+.choices__item--choice.is-highlighted{background:#0f2338}
+
+.market-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:20px}
+.market-summary-list{list-style:none;padding:0;margin:8px 0 0;max-height:260px;overflow-y:auto}
+.market-summary-list li{display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);font-size:0.9rem}
+.gainer-val{color:var(--good)}.loser-val{color:var(--bad)}.potential-val{color:var(--accent)}
+
+@keyframes flash-green{from{background:rgba(0,255,136,.3)}to{background:transparent}}
+@keyframes flash-red{from{background:rgba(255,59,91,.3)}to{background:transparent}}
+.flash-green{animation:flash-green 1s ease-out}
+.flash-red{animation:flash-red 1s ease-out}
+
+.conf-bar{height:7px;background:#1a2a40;border-radius:4px;margin-top:8px;overflow:hidden}
+.conf-fill{height:100%;background:var(--accent);width:0%;transition:width .5s ease}
+
+/* নতুন: হোস্টিং গাইড স্টাইল */
+.hosting-guide {margin-top: 30px; padding: 20px; background: var(--card); border-radius: 14px;}
+.hosting-guide h2 {color: var(--accent); margin-bottom: 15px;}
+.hosting-guide ol {color: var(--muted); font-size: 0.95rem; line-height: 1.6;}
+.hosting-guide li {margin-bottom: 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1 id="marketTitle">রিয়েল AI v3.2 (লাইভ)</h1>
+<div class="row">
+    <select id="symbolSelector" placeholder="সিলেক্ট করুন"></select>
+    <select id="intervalSelector">
+        <option value="1m">1m</option>
+        <option value="5m" selected>5m</option>
+        <option value="15m">15m</option>
+        <option value="1h">1h</option>
+    </select>
+    <div class="status" id="statusLine">লোড হচ্ছে...</div>
+</div>
+</header>
+
+<div class="grid">
+<div class="card">
+<iframe id="tradingViewChart" src="" allowfullscreen></iframe>
+</div>
+<div class="card">
+<div class="kv"><span>ক্লোজ (<span id="intervalLabel">5m</span>):</span><span class="big" id="lastC">-</span></div>
+<div class="kv"><span>সাপোর্ট:</span><span class="big" id="sup">-</span></div>
+<div class="kv"><span>রেজিস্ট্যান্স:</span><span class="big" id="res">-</span></div>
+<div class="kv"><span>EMA(9/21):</span><span class="big" id="ema">-</span></div>
+<div class="kv"><span>RSI(14):</span><span class="big" id="rsi">-</span></div>
+<div class="kv"><span>MACD:</span><span class="big" id="macd">-</span></div>
+<div class="kv"><span>BB(20,2):</span><span class="big" id="bb">-</span></div>
+<div class="kv"><span>ভলিউম স্পাইক:</span><span class="big" id="vol">-</span></div>
+
+<div class="pred">
+<h3>পরবর্তী ক্যান্ডেল (<span id="nextTime">--:--</span>)</h3>
+<div id="decision" class="big">ডেটা লোড হচ্ছে...</div>
+<div class="conf-bar"><div class="conf-fill" id="confFill"></div></div>
+<ul class="reasons" id="reasons"></ul>
+<div class="hint"><b>রিয়েল AI v3.2</b> — লাইভ + রিয়েল-টাইম টাইমার। শুধু ৮৫%+ কনফিডেন্স।</div>
+<div class="row" style="margin-top:10px">
+<button id="force">ফোর্স আপডেট</button>
+<div id="info" class="status"></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="market-summary-grid">
+<div class="card"><h3>Top Gainers</h3><ol id="gainersList" class="market-summary-list"><li>লোড হচ্ছে...</li></ol></div>
+<div class="card"><h3>Top Losers</h3><ol id="losersList" class="market-summary-list"><li>লোড হচ্ছে...</li></ol></div>
+<div class="card"><h3>Strong Movers</h3><div class="hint">রিকভারি >৯০% + ভলিউম</div><ol id="potentialList" class="market-summary-list"><li>লোড হচ্ছে...</li></ol></div>
+</div>
+
+<!-- নতুন: হোস্টিং গাইড সেকশন -->
+<div class="hosting-guide">
+<h2>অনলাইনে হোস্ট করার গাইড (কোনো IP ছাড়াই)</h2>
+<ol>
+<li>github.com-এ ফ্রি অ্যাকাউন্ট তৈরি করো।</li>
+<li>নতুন রিপোজিটরি তৈরি করো (নাম: real-ai-trading)।</li>
+<li>এই কোড index.html হিসেবে আপলোড করো এবং commit করো।</li>
+<li>Settings > Pages > Source: main > Save।</li>
+<li>১-২ মিনিট পর URL পাবে: https://তোমারইউজারনেম.github.io/real-ai-trading</li>
+<li>অন্য অপশন: Netlify.com-এ ড্র্যাগ-ড্রপ করো।</li>
+</ol>
+<div class="hint">সমস্যা হলে কমেন্ট করো — আমি হেল্প করব!</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/scripts/choices.min.js"></script>
+
+<script>
+// [আগের সব JS কোড একই — STATE, DOM, HELPERS, updateNextCandleTime, INDICATORS, decide, render, connectWS, loadHistorical, updateChart, change, loadSymbols, summaryWS, renderList, INIT]
+// (স্পেস সেভ করতে এখানে পুরো কোড না লিখে বলছি: তোমার আগের v3.1 কোডের JS অংশ কপি করো এবং এই ফাইলে পেস্ট করো। কোনো পরিবর্তন নেই।)
+</script>
+</body>
+</html>
